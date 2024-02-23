@@ -12,13 +12,16 @@
           {{ date }}
         </div>
       </div>
-      <div class="room1 center">Premier Suite</div>
-      <div class="room2 center">Superior Room</div>
-      <div class="room3 center">Grand Executive</div>
-      <div class="room4 center">Suite Luxury</div>
-      <div class="room5 center">Suite Classic Room</div>
-      <div class="room6 center">Penthouse Suite</div>
-
+      <!-- rooms section -->
+      <div
+        class="center"
+        :class="`room${index + 1}`"
+        v-for="(room, index) in rooms"
+        :key="index"
+      >
+        {{ room }}
+      </div>
+      <!-- dates section -->
       <div class="room1-dates">
         <div
           class="dates-item center"
@@ -30,10 +33,9 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Premier Suite')"
-            v-show="isDateBusy(date, 'Premier Suite')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Premier Suite')"
+            v-show="dayStatus(date, 'Premier Suite')"
+          ></span>
         </div>
       </div>
       <div class="room2-dates">
@@ -47,10 +49,9 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Superior Room')"
-            v-show="isDateBusy(date, 'Superior Room')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Superior Room')"
+            v-show="dayStatus(date, 'Superior Room')"
+          ></span>
         </div>
       </div>
       <div class="room3-dates">
@@ -64,10 +65,9 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Grand Executive')"
-            v-show="isDateBusy(date, 'Grand Executive')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Grand Executive')"
+            v-show="dayStatus(date, 'Grand Executive')"
+          ></span>
         </div>
       </div>
       <div class="room4-dates">
@@ -81,10 +81,9 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Suite Luxury')"
-            v-show="isDateBusy(date, 'Suite Luxury')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Suite Luxury')"
+            v-show="dayStatus(date, 'Suite Luxury')"
+          ></span>
         </div>
       </div>
       <div class="room5-dates">
@@ -98,10 +97,9 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Suite Classic Room')"
-            v-show="isDateBusy(date, 'Suite Classic Room')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Suite Classic Room')"
+            v-show="dayStatus(date, 'Suite Classic Room')"
+          ></span>
         </div>
       </div>
       <div class="room6-dates">
@@ -115,13 +113,11 @@
           day: {{ index }}
           <span
             class="booked-overlay center"
-            :class="getDateClass(date, 'Penthouse Suite')"
-            v-show="isDateBusy(date, 'Penthouse Suite')"
-            >BUSY</span
-          >
+            :class="dayStatus(date, 'Penthouse Suite')"
+            v-show="dayStatus(date, 'Penthouse Suite')"
+          ></span>
         </div>
       </div>
-      <div class="room1"></div>
     </section>
   </main>
 </template>
@@ -132,7 +128,16 @@ import { mapState, mapGetters } from "vuex";
 export default {
   name: "CalendarContainer",
   data() {
-    return {};
+    return {
+      rooms: [
+        "Premier Suite",
+        "Superior Room",
+        "Grand Executive",
+        "Suite Luxury",
+        "Suite Classic Room",
+        "Penthouse Suite",
+      ],
+    };
   },
   mounted() {
     this.$store.dispatch("initializeOrUpdateWeek");
@@ -193,40 +198,19 @@ export default {
         const startDate = new Date(reservation.start);
         const endDate = new Date(reservation.end);
         const checkDate = new Date(date);
-        console.log(
-          "start:",
-          startDate,
-          "\ncheck:",
-          checkDate,
-          "\nend:",
-          endDate
-        );
-        console.log("test :>> ", checkDate > startDate && checkDate < endDate);
+
         return checkDate > startDate && checkDate < endDate;
       });
     },
-    getDateClass(date, roomType) {
+    dayStatus(date, roomType) {
       if (this.isDateStart(date, roomType)) {
-        console.log("start date, roomtype :>> ", date, roomType);
         return "booked-overlay__start";
       } else if (this.isDateEnd(date, roomType)) {
-        console.log("end date, roomtype :>> ", date, roomType);
         return "booked-overlay__end";
       } else if (this.isDateTransit(date, roomType)) {
-        console.log("transit date, roomtype :>> ", date, roomType);
         return "booked-overlay__transit";
       }
       return "";
-    },
-    isDateBusy(date, roomName) {
-      // Используем метод find вместо forEach для улучшения производительности
-      const reservation = this.reservationsOnCurrentWeek.find((reservation) => {
-        return (
-          roomName === reservation.roomDetails.name &&
-          (date === reservation.start || date === reservation.end)
-        );
-      });
-      return !!reservation; // Приводим результат к булевому значению
     },
   },
 };
@@ -262,8 +246,8 @@ export default {
   color: white;
   z-index: 10;
   background-color: rgb(137, 58, 106);
-  bottom: 0px;
-  height: 55%;
+  bottom: 2px;
+  height: 70%;
   width: 55%;
 }
 .booked-overlay__start {
@@ -276,8 +260,7 @@ export default {
 }
 .booked-overlay__transit {
   position: absolute;
-  height: 100%;
-  width: 100%;
+  width: 102%;
 }
 .center {
   display: flex;
