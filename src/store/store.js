@@ -41,9 +41,8 @@ export const store = new Vuex.Store({
 
       return week;
     },
-    reservationsOnCurrentWeek(state, getters) {
-      // todo: реализовать логику в которой отображаются дни промежутка, не только start-end
-      const dates = getters.todayWeek;
+    reservationsOnCurrentWeek(state) {
+      const dates = state.currentWeek;
       const filteredObject = Object.keys(state.data)
         .filter(
           (key) =>

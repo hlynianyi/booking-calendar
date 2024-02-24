@@ -2,7 +2,7 @@
   <main>
     <nav class="nav">
       <button class="button" @click="previousWeek">Backward</button>
-      <button class="button" @click="todayWeek">Today</button>
+      <button class="button" @click="resetWeek">Today</button>
       <button class="button" @click="nextWeek">Forward</button>
     </nav>
     <!-- calendar section -->
@@ -21,6 +21,7 @@
       >
         {{ room }}
       </div>
+      <!-- check case if booking is day-to-day e.g. 2024-04-02..-->
       <!-- dates section -->
       <div class="room1-dates">
         <div
@@ -54,7 +55,8 @@
           ></span>
         </div>
       </div>
-      <div class="room3-dates">
+
+      <div class="room3-dates" ref="room3">
         <div
           class="dates-item center"
           v-for="(date, index) in currentWeek"
@@ -64,9 +66,10 @@
         >
           day: {{ index }}
           <span
+            v-if="isBooked(date, 'Grand Executive')"
             class="booked-overlay center"
-            :class="dayStatus(date, 'Grand Executive')"
-            v-show="dayStatus(date, 'Grand Executive')"
+            :style="getOverlayStyle('Grand Executive')"
+            :data-name="getOverlayStyle('Grand Executive').dataName"
           ></span>
         </div>
       </div>
@@ -151,6 +154,11 @@ export default {
     }),
   },
   methods: {
+    resetWeek() {
+      // todo: fix
+      let startDate = new Date(this.todayWeek);
+      this.updateWeek(startDate);
+    },
     previousWeek() {
       let startDate = new Date(this.currentWeek[0]);
       startDate.setDate(startDate.getDate() - 7);
@@ -168,6 +176,7 @@ export default {
         newDate.setDate(newDate.getDate() + i);
         newWeek.push(this.formatDate(newDate));
       }
+      console.log("------------- :>> ");
       this.$store.commit("updateCurrentWeek", newWeek);
     },
     formatDate(date) {
@@ -203,6 +212,7 @@ export default {
       });
     },
     dayStatus(date, roomType) {
+      // console.log(this.reservationsOnCurrentWeek);
       if (this.isDateStart(date, roomType)) {
         return "booked-overlay__start";
       } else if (this.isDateEnd(date, roomType)) {
@@ -211,6 +221,75 @@ export default {
         return "booked-overlay__transit";
       }
       return "";
+    },
+    isBooked(date, roomType) {
+      return this.isDateStart(date, roomType);
+      // || this.isDateEnd(date, roomType)
+      // || this.isDateTransit(date, roomType)
+    },
+    getOverlayStyle(roomType) {
+      const dates = this.currentWeek.map((day) => new Date(day));
+      let startDayIndex = null;
+      let endDayIndex = null;
+      let reservationName;
+      // Найдем индексы начала и конца бронирования
+      this.reservationsOnCurrentWeek.forEach((reservation) => {
+        if (reservation.roomDetails.name === roomType) {
+          reservationName = reservation.name;
+          console.log("reservation :>> ", reservation);
+          const startIndex = dates.findIndex(
+            (date) => date.toISOString().split("T")[0] === reservation.start
+          );
+          const endIndex = dates.findIndex(
+            (date) => date.toISOString().split("T")[0] === reservation.end
+          );
+          console.log("startIndex, endIndex :>> ", startIndex, endIndex);
+
+          if (startIndex > 0) {
+            startDayIndex = startIndex;
+          }
+
+          if (endIndex > 0) {
+            endDayIndex = endIndex;
+          } else {
+            endDayIndex = 7;
+          }
+        }
+      });
+
+      if (startDayIndex === null || endDayIndex === null) {
+        // Если не найдено бронирование, ничего не отображаем
+        return {
+          display: "none",
+        };
+      }
+      const startWidth = 0.5;
+      const endWidth = endDayIndex === 7 ? 1 : 0.5;
+      const fullDaysWidth =
+        endDayIndex === 7
+          ? (endDayIndex - startDayIndex - 2) * 1
+          : (endDayIndex - startDayIndex - 1) * 1;
+
+      const width = (startWidth + endWidth + fullDaysWidth) * 100;
+      console.log(
+        "info sw + ew + fdw * 100 :>> ",
+        startWidth,
+        endWidth,
+        fullDaysWidth,
+        (startWidth + endWidth + fullDaysWidth) * 100
+      );
+
+      return {
+        position: "absolute",
+        left: `${47}%`,
+        width: `${width}%`,
+        top: "0",
+        height: "100%", // высота оверлея должна соответствовать контейнеру
+        backgroundColor: "darkslateblue", // Пример цвета фона
+        // Остальные стили по необходимости
+        borderRadius: `20px 0 0 20px`,
+        dataName: reservationName,
+      };
     },
   },
 };
@@ -230,6 +309,8 @@ export default {
 }
 
 .container {
+  position: relative;
+  width: 95vw;
   margin-top: 12px;
   display: grid;
   grid-template-columns: 0.4fr 1.6fr;
@@ -241,14 +322,20 @@ export default {
   height: 80vh;
   border: 1px solid black;
 }
+.dates-item {
+  position: relative;
+}
 .booked-overlay {
   position: absolute;
   color: white;
   z-index: 10;
-  background-color: rgb(137, 58, 106);
-  bottom: 2px;
+  background-color: cornflowerblue;
   height: 70%;
   width: 55%;
+}
+.booked-overlay::after {
+  content: attr(data-name);
+  /* Остальные стили для псевдоэлемента */
 }
 .booked-overlay__start {
   right: 0;
@@ -345,6 +432,7 @@ export default {
 }
 
 .room3-dates {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr;
