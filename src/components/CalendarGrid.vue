@@ -21,7 +21,6 @@
       >
         {{ room }}
       </div>
-      <!-- check case if booking is day-to-day e.g. 2024-04-02..-->
       <!-- dates section -->
       <div class="room1-dates">
         <div
@@ -66,10 +65,16 @@
         >
           day: {{ index }}
           <span
-            v-if="isBooked(date, 'Grand Executive')"
+            v-if="isDateStart(index, date, 'Grand Executive')"
             class="booked-overlay center"
-            :style="getOverlayStyle('Grand Executive')"
-            :data-name="getOverlayStyle('Grand Executive').dataName"
+            :style="getOverlayStyle('Grand Executive', 'start')"
+            :data-name="getOverlayStyle('Grand Executive', 'start').dataName"
+          ></span>
+          <span
+            v-if="isDateEnd(index, date, 'Grand Executive')"
+            class="booked-overlay center"
+            :style="getOverlayStyle('Grand Executive', 'end')"
+            :data-name="getOverlayStyle('Grand Executive', 'end').dataName"
           ></span>
         </div>
       </div>
@@ -186,18 +191,21 @@ export default {
       const clickedItemId = event.target.id;
       console.log(clickedItemId); // Вы можете использовать ID для дальнейшей логики
     },
-    isDateStart(date, roomType) {
+    isDateStart(index, date, roomType) {
       return this.reservationsOnCurrentWeek.some(
         (reservation) =>
           reservation.roomDetails.name === roomType &&
           reservation.start === date
       );
     },
-    isDateEnd(date, roomType) {
-      return this.reservationsOnCurrentWeek.some(
-        (reservation) =>
-          reservation.roomDetails.name === roomType && reservation.end === date
-      );
+    isDateEnd(index, date, roomType) {
+      return this.reservationsOnCurrentWeek.some((reservation) => {
+        return (
+          reservation.roomDetails.name === roomType &&
+          reservation.end === date &&
+          !this.currentWeek.includes(reservation.start)
+        );
+      });
     },
     isDateTransit(date, roomType) {
       return this.reservationsOnCurrentWeek.some((reservation) => {
@@ -212,7 +220,6 @@ export default {
       });
     },
     dayStatus(date, roomType) {
-      // console.log(this.reservationsOnCurrentWeek);
       if (this.isDateStart(date, roomType)) {
         return "booked-overlay__start";
       } else if (this.isDateEnd(date, roomType)) {
@@ -222,74 +229,96 @@ export default {
       }
       return "";
     },
-    isBooked(date, roomType) {
-      return this.isDateStart(date, roomType);
-      // || this.isDateEnd(date, roomType)
-      // || this.isDateTransit(date, roomType)
-    },
-    getOverlayStyle(roomType) {
+    getOverlayStyle(roomType, actionType) {
       const dates = this.currentWeek.map((day) => new Date(day));
+      let startWidth = 0.5;
+      let endWidth = 0.5;
+
       let startDayIndex = null;
       let endDayIndex = null;
       let reservationName;
       // Найдем индексы начала и конца бронирования
+
       this.reservationsOnCurrentWeek.forEach((reservation) => {
         if (reservation.roomDetails.name === roomType) {
           reservationName = reservation.name;
-          console.log("reservation :>> ", reservation);
-          const startIndex = dates.findIndex(
-            (date) => date.toISOString().split("T")[0] === reservation.start
-          );
-          const endIndex = dates.findIndex(
-            (date) => date.toISOString().split("T")[0] === reservation.end
-          );
-          console.log("startIndex, endIndex :>> ", startIndex, endIndex);
+          console.log("actionType :>> ", actionType);
+          switch (actionType) {
+            case "start":
+              {
+                const startIndex = dates.findIndex(
+                  (date) =>
+                    date.toISOString().split("T")[0] === reservation.start
+                );
+                const endIndex = dates.findIndex(
+                  (date) => date.toISOString().split("T")[0] === reservation.end
+                );
 
-          if (startIndex > 0) {
-            startDayIndex = startIndex;
-          }
+                if (startIndex > 0) {
+                  startDayIndex = startIndex;
+                }
 
-          if (endIndex > 0) {
-            endDayIndex = endIndex;
-          } else {
-            endDayIndex = 7;
+                if (endIndex > 0) {
+                  endDayIndex = endIndex;
+                } else {
+                  endDayIndex = 7;
+                  endWidth = 1;
+                }
+              }
+              break;
+            case "end": {
+              startDayIndex = 0;
+              const endIndex = dates.findIndex(
+                (date) => date.toISOString().split("T")[0] === reservation.end
+              );
+              console.log("endIndex :>> ", endIndex);
+              if (endIndex > 0) {
+                endDayIndex = endIndex;
+                startWidth = 1;
+              }
+              break;
+            }
           }
         }
       });
 
       if (startDayIndex === null || endDayIndex === null) {
-        // Если не найдено бронирование, ничего не отображаем
         return {
           display: "none",
         };
       }
-      const startWidth = 0.5;
-      const endWidth = endDayIndex === 7 ? 1 : 0.5;
       const fullDaysWidth =
         endDayIndex === 7
           ? (endDayIndex - startDayIndex - 2) * 1
           : (endDayIndex - startDayIndex - 1) * 1;
 
       const width = (startWidth + endWidth + fullDaysWidth) * 100;
-      console.log(
-        "info sw + ew + fdw * 100 :>> ",
-        startWidth,
-        endWidth,
-        fullDaysWidth,
-        (startWidth + endWidth + fullDaysWidth) * 100
-      );
 
-      return {
-        position: "absolute",
-        left: `${47}%`,
-        width: `${width}%`,
-        top: "0",
-        height: "100%", // высота оверлея должна соответствовать контейнеру
-        backgroundColor: "darkslateblue", // Пример цвета фона
-        // Остальные стили по необходимости
-        borderRadius: `20px 0 0 20px`,
-        dataName: reservationName,
-      };
+      if (actionType === "start") {
+        return {
+          position: "absolute",
+          left: `${47}%`,
+          width: `${width}%`,
+          top: "0",
+          height: "100%", // высота оверлея должна соответствовать контейнеру
+          backgroundColor: "darkslateblue", // Пример цвета фона
+          // Остальные стили по необходимости
+          borderRadius: `20px 0 0 20px`,
+          dataName: reservationName,
+        };
+      } else {
+        return {
+          position: "absolute",
+          right: `${50}%`,
+          width: `${width}%`,
+          top: "0",
+          height: "100%", // высота оверлея должна соответствовать контейнеру
+          backgroundColor: "darkslateblue", // Пример цвета фона
+          // Остальные стили по необходимости
+          borderRadius: `0 20px 20px 0`,
+          dataName: reservationName,
+        };
+      }
     },
   },
 };
