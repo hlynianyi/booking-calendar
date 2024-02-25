@@ -1,12 +1,7 @@
 <template>
   <main>
-    <nav class="nav">
-      <button class="button" @click="previousWeek">Backward</button>
-      <button class="button" @click="resetWeek">Today</button>
-      <button class="button" @click="nextWeek">Forward</button>
-    </nav>
-    <!-- calendar section -->
     <section class="container">
+      <!-- week section -->
       <div class="dates-container">
         <div
           class="center date-item"
@@ -26,191 +21,40 @@
       >
         {{ room }}
       </div>
-      <!-- dates section -->
-      <div class="room1-dates">
+      <!-- days sections -->
+      <div
+        v-for="(room, roomId) in rooms"
+        :class="`room${roomId + 1}-dates`"
+        :key="room"
+      >
         <div
           class="dates-item center"
           v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
+          :key="`day-${room}-${index}`"
           :style="isDayToday(date)"
         >
           <span
-            v-if="isDateStart(date, 'Premier Suite')"
+            v-if="isDateStart(date, room)"
             class="booked-overlay center"
-            :style="getOverlayStyle('Premier Suite', 'start')"
-            :data-name="getOverlayStyle('Premier Suite', 'start').dataName"
-            @click="showModal('Premier Suite', date, 'start')"
+            @click="showModal(room, date, 'start')"
+            :style="getOverlayStyle(room, date, 'start')"
+            :data-name="getOverlayStyle(room, date, 'start').dataName"
           ></span>
           <span
-            v-if="isDateEnd(date, 'Premier Suite')"
+            v-if="isDateEnd(date, room)"
             class="booked-overlay center"
-            :style="getOverlayStyle('Premier Suite', 'end')"
-            :data-name="getOverlayStyle('Premier Suite', 'end').dataName"
-            @click="showModal('Premier Suite', date, 'end')"
+            @click="showModal(room, date, 'end')"
+            :style="getOverlayStyle(room, date, 'end')"
+            :data-name="getOverlayStyle(room, date, 'end').dataName"
           ></span>
         </div>
         <ModalReservationInfo
+          name="modal"
           v-show="isModalVisible"
           @close="closeModal"
           :room="selectedRoom"
           :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
-      </div>
-      <div class="room2-dates">
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, 'Superior Room')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Superior Room', 'start')"
-            :data-name="getOverlayStyle('Superior Room', 'start').dataName"
-            @click="showModal('Superior Room', date, 'start')"
-          ></span>
-          <span
-            v-if="isDateEnd(date, 'Superior Room')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Superior Room', 'end')"
-            :data-name="getOverlayStyle('Superior Room', 'end').dataName"
-            @click="showModal('Superior Room', date, 'end')"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
-      </div>
-
-      <div class="room3-dates">
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, 'Grand Executive')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Grand Executive', 'start')"
-            :data-name="getOverlayStyle('Grand Executive', 'start').dataName"
-            @click="showModal('Grand Executive', date, 'start')"
-          ></span>
-          <span
-            v-if="isDateEnd(date, 'Grand Executive')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Grand Executive', 'end')"
-            :data-name="getOverlayStyle('Grand Executive', 'end').dataName"
-            @click="showModal('Grand Executive', date, 'end')"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
-      </div>
-      <div class="room4-dates">
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, 'Suite Luxury')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Suite Luxury', 'start')"
-            :data-name="getOverlayStyle('Suite Luxury', 'start').dataName"
-            @click="showModal('Suite Luxury', date, 'start')"
-          ></span>
-          <span
-            v-if="isDateEnd(date, 'Suite Luxury')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Suite Luxury', 'end')"
-            :data-name="getOverlayStyle('Suite Luxury', 'end').dataName"
-            @click="showModal('Suite Luxury', date, 'end')"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
-      </div>
-      <div class="room5-dates">
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, 'Suite Classic Room')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Suite Classic Room', 'start')"
-            :data-name="getOverlayStyle('Suite Classic Room', 'start').dataName"
-            @click="showModal('Suite Classic Room', date, 'start')"
-          ></span>
-          <span
-            v-if="isDateEnd(date, 'Suite Classic Room')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Suite Classic Room', 'end')"
-            :data-name="getOverlayStyle('Suite Classic Room', 'end').dataName"
-            @click="showModal('Suite Classic Room', date, 'end')"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
-      </div>
-      <div class="room6-dates">
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, 'Penthouse Suite')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Penthouse Suite', 'start')"
-            :data-name="getOverlayStyle('Penthouse Suite', 'start').dataName"
-            @click="showModal('Penthouse Suite', date, 'start')"
-          ></span>
-          <span
-            v-if="isDateEnd(date, 'Penthouse Suite')"
-            class="booked-overlay center"
-            :style="getOverlayStyle('Penthouse Suite', 'end')"
-            :data-name="getOverlayStyle('Penthouse Suite', 'end').dataName"
-            @click="showModal('Penthouse Suite', date, 'end')"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="this.reservationsOnCurrentWeek"
+          :reservations="reservationsOnCurrentWeek"
           :actionType="actionType"
         />
       </div>
@@ -219,9 +63,9 @@
 </template>
 
 <script>
-import { mapState, mapGetters } from "vuex";
 import ModalReservationInfo from "./ModalReservationInfo.vue";
-import { formatDate } from "../helpers/formatDate";
+import { mapState, mapGetters } from "vuex";
+import { formatDate } from "../utils/formatDate";
 
 export default {
   name: "calendar-container",
@@ -250,7 +94,6 @@ export default {
   computed: {
     ...mapState(["currentWeek", "currentDay"]),
     ...mapGetters({
-      allEvents: "allEvents",
       todayWeek: "todayWeek",
       reservationsOnCurrentWeek: "reservationsOnCurrentWeek",
     }),
@@ -268,35 +111,9 @@ export default {
     isDayToday(date) {
       if (formatDate(this.currentDay) === date) {
         return {
-          backgroundColor: "lightgreen",
+          backgroundColor: "palegreen",
         };
       }
-    },
-    resetWeek() {
-      this.$store.commit("updateCurrentWeek", this.todayWeek);
-    },
-    previousWeek() {
-      let startDate = new Date(this.currentWeek[0]);
-      startDate.setDate(startDate.getDate() - 7);
-      this.updateWeek(startDate);
-    },
-    nextWeek() {
-      let endDate = new Date(this.currentWeek[this.currentWeek.length - 1]);
-      endDate.setDate(endDate.getDate() + 1); // начало следующей недели
-      this.updateWeek(endDate);
-    },
-    updateWeek(startDate) {
-      let newWeek = [];
-      for (let i = 0; i < 7; i++) {
-        let newDate = new Date(startDate);
-        newDate.setDate(newDate.getDate() + i);
-        newWeek.push(this.formatDate(newDate));
-      }
-      console.log("------------- :>> ", newWeek);
-      this.$store.commit("updateCurrentWeek", newWeek);
-    },
-    formatDate(date) {
-      return date.toISOString().split("T")[0];
     },
     isDateStart(date, roomType) {
       return this.reservationsOnCurrentWeek.some(
@@ -314,86 +131,60 @@ export default {
         );
       });
     },
-    getOverlayStyle(roomType, actionType) {
-      const dates = this.currentWeek.map((day) => new Date(day));
-      let startWidth = 0.5;
-      let endWidth = 0.5;
+    getOverlayStyle(roomType, date, actionType) {
+      const dates = this.currentWeek.map(
+        (day) => new Date(day).toISOString().split("T")[0]
+      );
 
-      let startDayIndex = null;
-      let endDayIndex = null;
-      let reservationName = "";
+      const reservation = this.reservationsOnCurrentWeek.find(
+        (res) => res[actionType] === date && roomType === res.roomDetails.name
+      );
+      let reservationName = reservation.name ?? "";
 
-      this.reservationsOnCurrentWeek.forEach((reservation) => {
-        if (reservation.roomDetails.name === roomType) {
-          switch (actionType) {
-            case "start":
-              {
-                const startIndex = dates.findIndex(
-                  (date) =>
-                    date.toISOString().split("T")[0] === reservation.start
-                );
-                const endIndex = dates.findIndex(
-                  (date) => date.toISOString().split("T")[0] === reservation.end
-                );
+      const monday = dates[0];
+      const sunday = dates[dates.length - 1];
 
-                if (startIndex > 0) {
-                  startDayIndex = startIndex;
-                }
+      let startDayIndex = dates.indexOf(reservation.start) ?? -1;
+      let endDayIndex = dates.indexOf(reservation.end) ?? dates.length;
 
-                if (endIndex > 0) {
-                  endDayIndex = endIndex;
-                } else {
-                  endDayIndex = 7;
-                  endWidth = 1;
-                }
-                // Проверяем, совпадает ли индекс дня с началом или концом бронирования
-                if (
-                  (actionType === "start" && startIndex >= 0) ||
-                  (actionType === "end" && endIndex >= 0)
-                ) {
-                  reservationName = reservation.name; // Устанавливаем имя для отображения
-                }
-              }
-              break;
-            case "end": {
-              startDayIndex = 0;
-              const endIndex = dates.findIndex(
-                (date) => date.toISOString().split("T")[0] === reservation.end
-              );
-              if (endIndex > 0) {
-                endDayIndex = endIndex;
-                startWidth = 1;
-              }
-              // Проверяем, совпадает ли индекс дня с началом или концом бронирования
-              if (
-                (actionType === "start" && startDayIndex >= 0) ||
-                (actionType === "end" && endIndex >= 0)
-              ) {
-                reservationName = reservation.name; // Устанавливаем имя для отображения
-              }
-              break;
-            }
-          }
-        }
-      });
+      const startedOnThisWeek = startDayIndex !== -1;
+      const finishedOnThisWeek = endDayIndex !== -1;
 
-      if (
-        startDayIndex === null ||
-        endDayIndex === null ||
-        reservationName === ""
-      ) {
-        return {
-          display: "none",
-        };
+      let startWidth = startDayIndex === -1 ? 1 : 0.5;
+      let endWidth = endDayIndex === dates.length ? 1 : 0.5;
+
+      if (startDayIndex === -1 && reservation.start < monday) {
+        startDayIndex = 0;
+        startWidth = 1;
+      }
+      if (endDayIndex === -1 && reservation.end > sunday) {
+        endWidth = 1;
       }
 
-      const fullDaysWidth =
-        endDayIndex === 7
-          ? (endDayIndex - startDayIndex - 2) * 1
-          : (endDayIndex - startDayIndex - 1) * 1;
+      const fullDaysWidth = () => {
+        if (actionType === "start" && finishedOnThisWeek) {
+          return endDayIndex - startDayIndex - 1;
+        } else if (actionType === "start" && finishedOnThisWeek === false) {
+          return 6 - startDayIndex - 1;
+        }
+        if (actionType === "end" && startedOnThisWeek) {
+          return endDayIndex - startDayIndex - 1;
+        } else if (actionType === "end" && startedOnThisWeek === false) {
+          return endDayIndex - startDayIndex - 1;
+        }
+      };
 
-      const width = (startWidth + endWidth + fullDaysWidth) * 100;
+      const width = (startWidth + endWidth + fullDaysWidth()) * 100;
 
+      const borderRadius = () => {
+        if (startedOnThisWeek && finishedOnThisWeek) {
+          return "20px";
+        } else if (startedOnThisWeek && !finishedOnThisWeek) {
+          return "20px 0 0 20px";
+        } else {
+          return "0 20px 20px 0";
+        }
+      };
       const style = {
         position: "absolute",
         width: `${width}%`,
@@ -401,16 +192,9 @@ export default {
         bottom: "5px",
         backgroundColor: "royalblue",
         dataName: reservationName,
-        ...(actionType === "start" && { left: `${47}%` }),
-        ...(actionType === "end" && { right: `${47}%` }),
-        ...(startDayIndex > 0 &&
-          endDayIndex !== 7 && { borderRadius: "20px 20px 20px 20px" }),
-        ...(actionType === "start" &&
-          endDayIndex === 7 && { borderRadius: "20px 0 0 20px" }),
-        ...(actionType === "start" &&
-          endDayIndex < startDayIndex && { borderRadius: "20px 0 0 20px" }),
-        ...(actionType === "end" &&
-          endDayIndex !== 7 && { borderRadius: "0px 20px 20px 0px" }),
+        left: actionType === "start" ? `${50}%` : undefined,
+        right: actionType === "end" ? `${50}%` : undefined,
+        borderRadius: `${borderRadius()}`,
       };
 
       return style;
@@ -420,30 +204,17 @@ export default {
 </script>
 
 <style scoped>
-.nav {
-  display: flex;
-  gap: 8px;
-}
-.button {
-  font-size: 1em;
-  padding: 8px 12px;
-  color: white;
-  border-radius: 4px;
-  background-color: darkslateblue;
-}
-
 .container {
   border: 0;
   position: relative;
   width: auto;
-  margin-top: 12px;
   display: grid;
-  grid-template-columns: 0.4fr 1.6fr;
-  grid-template-rows: repeat(7, 1fr);
+  grid-template-columns: 0.6fr 2fr;
+  grid-template-rows: auto 1fr 1fr;
   grid-auto-columns: 1fr;
   grid-auto-rows: 1fr;
   grid-auto-flow: row;
-  height: 90vh;
+  height: calc(100vh - 50px);
 }
 .dates-item {
   position: relative;
@@ -468,14 +239,15 @@ export default {
 
 .dates-container {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
   gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas: ". . . . . . .";
   grid-area: 1 / 2 / 2 / 3;
   border: 1px solid #ccc;
-  margin-bottom: 4px;
+  height: 50px;
+  margin-bottom: 12px;
 }
 
 .date-item {
@@ -523,7 +295,7 @@ export default {
 
 .room2-dates {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
   gap: 0px 0px;
   grid-auto-flow: row;
@@ -533,9 +305,8 @@ export default {
 
 .room1-dates {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
-  gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas: ". . . . . . .";
   grid-area: 2 / 2 / 3 / 3;
@@ -548,19 +319,16 @@ export default {
 .room3-dates {
   position: relative;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
-  gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas: ". . . . . . .";
   grid-area: 4 / 2 / 5 / 3;
 }
-
 .room4-dates {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
-  gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas: ". . . . . . .";
   grid-area: 5 / 2 / 6 / 3;
@@ -568,7 +336,8 @@ export default {
 
 .room5-dates {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
+
   grid-template-rows: 1fr;
   gap: 0px 0px;
   grid-auto-flow: row;
@@ -578,9 +347,8 @@ export default {
 
 .room6-dates {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: repeat(7, 1fr);
   grid-template-rows: 1fr;
-  gap: 0px 0px;
   grid-auto-flow: row;
   grid-template-areas: ". . . . . . .";
   grid-area: 7 / 2 / 8 / 3;

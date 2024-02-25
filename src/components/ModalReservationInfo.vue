@@ -1,42 +1,3 @@
-<script>
-export default {
-  name: "ModalReservationInfo",
-  props: {
-    room: String,
-    date: String,
-    reservations: Array,
-    actionType: String,
-  },
-  computed: {
-    matchingReservation() {
-      // console.log(
-      //   this.actionType,
-      //   this.room,
-      //   this.date,
-      //   this.reservations.find((reservation) => {
-      //     return (
-      //       reservation.roomDetails.name === this.room &&
-      //       reservation.start === this.date
-      //     );
-      //   })
-      // );
-      const searchingDate = this.actionType === "start" ? "start" : "end";
-      return this.reservations.find((reservation) => {
-        return (
-          reservation.roomDetails.name === this.room &&
-          reservation[searchingDate] === this.date
-        );
-      });
-    },
-  },
-  methods: {
-    close() {
-      this.$emit("close");
-    },
-  },
-};
-</script>
-
 <template>
   <transition name="modal-fade">
     <div class="modal-backdrop" v-if="matchingReservation">
@@ -78,6 +39,34 @@ export default {
     </div>
   </transition>
 </template>
+
+<script>
+export default {
+  name: "ModalReservationInfo",
+  props: {
+    room: String,
+    date: String,
+    reservations: Array,
+    actionType: String,
+  },
+  computed: {
+    matchingReservation() {
+      const searchingDate = this.actionType === "start" ? "start" : "end";
+      return this.reservations.find((reservation) => {
+        return (
+          reservation.roomDetails.name === this.room &&
+          reservation[searchingDate] === this.date
+        );
+      });
+    },
+  },
+  methods: {
+    close() {
+      this.$emit("close");
+    },
+  },
+};
+</script>
 
 <style>
 h1 {
@@ -152,7 +141,7 @@ h5 {
 }
 .modal-fade-enter,
 .modal-fade-leave-to {
-  opacity: 0;
+  opacity: 0.2;
 }
 .modal-fade-enter-active,
 .modal-fade-leave-active {

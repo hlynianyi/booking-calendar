@@ -1,8 +1,8 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import jsonData from "../assets/bookings.json";
-import { formatJson } from "../helpers/jsonFormatter";
-import { formatDate } from "../helpers/formatDate";
+import jsonData from "../static/bookings.json";
+import { formatJson } from "../utils/jsonFormatter";
+import { formatDate } from "../utils/formatDate";
 
 Vue.use(Vuex);
 
@@ -13,9 +13,6 @@ export const store = new Vuex.Store({
     currentWeek: [],
   },
   getters: {
-    allEvents(state) {
-      return state.data;
-    },
     todayWeek(state) {
       const today = state.currentDay;
       const weekStart =
