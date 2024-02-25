@@ -19,6 +19,16 @@
           </div>
           <div class="booking-info">
             <h3>{{ matchingReservation.typeOfApartments }}</h3>
+            <h4>
+              <strong> {{ matchingReservation.roomDetails.name }} </strong>
+            </h4>
+            <h4>
+              Start date: <strong>{{ matchingReservation.start }}</strong>
+            </h4>
+            <h4>
+              End date: <strong>{{ matchingReservation.end }}</strong>
+            </h4>
+            <br />
             <h3><strong>Number of Guests:</strong></h3>
             <h4>Adults: {{ matchingReservation.guestInfo.adults }}</h4>
             <h4>Children: {{ matchingReservation.guestInfo.children }}</h4>

@@ -43,7 +43,6 @@ export default {
         newDate.setDate(newDate.getDate() + i);
         newWeek.push(this.formatDate(newDate));
       }
-      // console.log('updateWeek > ', startDate);
       this.$store.commit("updateCurrentWeek", newWeek);
     },
     formatDate(date) {
