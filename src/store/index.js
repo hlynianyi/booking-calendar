@@ -45,7 +45,6 @@ export const store = new Vuex.Store({
       state.currentWeek = newWeek;
     },
     updateToday(state) {
-      // Обновляем сегодняшнюю дату на реальное текущее время
       state.currentDay = new Date();
     },
   },
@@ -69,9 +68,8 @@ export const store = new Vuex.Store({
       commit("updateCurrentWeek", week);
     },
     resetWeek({ commit, getters }) {
-      // Получаем текущую неделю из геттеров
       const week = getters.todayWeek;
-      // Коммитим новую неделю в состояние
+      // Получаем текущую неделю из геттеров и коммитим новую неделю в состояние
       commit("updateCurrentWeek", week);
     },
   },
