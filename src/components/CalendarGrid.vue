@@ -1,63 +1,61 @@
 <template>
-  <main>
-    <section class="container">
-      <!-- week section -->
-      <div class="dates-container">
-        <div
-          class="center date-item"
-          v-for="date in currentWeek"
-          :key="date"
-          :style="isDayToday(date)"
-        >
-          {{ date }}
-        </div>
-      </div>
-      <!-- rooms section -->
+  <main class="container">
+    <!-- week section -->
+    <header class="dates-container">
       <div
-        class="center"
-        :class="`room${index + 1}`"
-        v-for="(room, index) in rooms"
-        :key="index"
+        class="center date-item"
+        v-for="date in currentWeek"
+        :key="date"
+        :style="isDayToday(date)"
       >
-        {{ room }}
+        {{ date }}
       </div>
-      <!-- days sections -->
+    </header>
+    <!-- rooms section -->
+    <aside
+      class="center"
+      :class="`room${index + 1}`"
+      v-for="(room, index) in rooms"
+      :key="index"
+    >
+      {{ room }}
+    </aside>
+    <!-- days sections -->
+    <section
+      v-for="(room, roomId) in rooms"
+      :class="`room${roomId + 1}-dates`"
+      :key="room"
+    >
       <div
-        v-for="(room, roomId) in rooms"
-        :class="`room${roomId + 1}-dates`"
-        :key="room"
+        class="dates-item center"
+        v-for="(date, index) in currentWeek"
+        :key="`day-${room}-${index}`"
+        :style="isDayToday(date)"
       >
-        <div
-          class="dates-item center"
-          v-for="(date, index) in currentWeek"
-          :key="`day-${room}-${index}`"
-          :style="isDayToday(date)"
-        >
-          <span
-            v-if="isDateStart(date, room)"
-            class="booked-overlay center"
-            @click="showModal(room, date, 'start')"
-            :style="getOverlayStyle(room, date, 'start')"
-            :data-name="getOverlayStyle(room, date, 'start').dataName"
-          ></span>
-          <span
-            v-if="isDateEnd(date, room)"
-            class="booked-overlay center"
-            @click="showModal(room, date, 'end')"
-            :style="getOverlayStyle(room, date, 'end')"
-            :data-name="getOverlayStyle(room, date, 'end').dataName"
-          ></span>
-        </div>
-        <ModalReservationInfo
-          name="modal"
-          v-show="isModalVisible"
-          @close="closeModal"
-          :room="selectedRoom"
-          :date="selectedDate"
-          :reservations="reservationsOnCurrentWeek"
-          :actionType="actionType"
-        />
+        <span
+          v-if="isDateStart(date, room)"
+          class="booked-overlay center"
+          @click="showModal(room, date, 'start')"
+          :style="getOverlayStyle(room, date, 'start')"
+          :data-name="getOverlayStyle(room, date, 'start').dataName"
+        ></span>
+        <span
+          v-if="isDateEnd(date, room)"
+          class="booked-overlay center"
+          @click="showModal(room, date, 'end')"
+          :style="getOverlayStyle(room, date, 'end')"
+          :data-name="getOverlayStyle(room, date, 'end').dataName"
+        ></span>
       </div>
+      <ModalReservationInfo
+        name="modal"
+        v-show="isModalVisible"
+        @close="closeModal"
+        :room="selectedRoom"
+        :date="selectedDate"
+        :reservations="reservationsOnCurrentWeek"
+        :actionType="actionType"
+      />
     </section>
   </main>
 </template>
@@ -162,14 +160,9 @@ export default {
       }
 
       const fullDaysWidth = () => {
-        if (actionType === "start" && finishedOnThisWeek) {
-          return endDayIndex - startDayIndex - 1;
-        } else if (actionType === "start" && finishedOnThisWeek === false) {
+        if (actionType === "start" && finishedOnThisWeek === false) {
           return 6 - startDayIndex - 1;
-        }
-        if (actionType === "end" && startedOnThisWeek) {
-          return endDayIndex - startDayIndex - 1;
-        } else if (actionType === "end" && startedOnThisWeek === false) {
+        } else {
           return endDayIndex - startDayIndex - 1;
         }
       };
@@ -185,29 +178,26 @@ export default {
           return "0 20px 20px 0";
         }
       };
-      const style = {
+
+      return {
         position: "absolute",
         width: `${width}%`,
         height: "70%",
         bottom: "5px",
         backgroundColor: "royalblue",
         dataName: reservationName,
+        borderRadius: `${borderRadius()}`,
         left: actionType === "start" ? `${50}%` : undefined,
         right: actionType === "end" ? `${50}%` : undefined,
-        borderRadius: `${borderRadius()}`,
       };
-
-      return style;
     },
   },
 };
 </script>
 
 <style scoped>
-.container {
-  border: 0;
+main {
   position: relative;
-  width: auto;
   display: grid;
   grid-template-columns: 0.6fr 2fr;
   grid-template-rows: auto 1fr 1fr;

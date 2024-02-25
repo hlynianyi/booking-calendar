@@ -17,7 +17,6 @@ export const store = new Vuex.Store({
       const today = state.currentDay;
       const weekStart =
         today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
-      // Понедельник как первый день недели
       let week = [];
       for (let i = 0; i < 7; i++) {
         let day = new Date(today.setDate(weekStart + i));
@@ -42,11 +41,9 @@ export const store = new Vuex.Store({
     },
   },
   mutations: {
-    // Мутация для обновления текущей недели
     updateCurrentWeek(state, newWeek) {
       state.currentWeek = newWeek;
     },
-    // Мутация для обновления сегодняшней даты (если потребуется)
     updateToday(state) {
       // Обновляем сегодняшнюю дату на реальное текущее время
       state.currentDay = new Date();
