@@ -15,7 +15,6 @@ import { mapState, mapGetters } from "vuex";
 
 export default {
   name: "NavigationButtons",
-  props: {},
   computed: {
     ...mapState(["currentWeek"]),
     ...mapGetters({
