@@ -2,38 +2,26 @@ import Vue from "vue";
 import Vuex from "vuex";
 import jsonData from "../assets/bookings.json";
 import { formatJson } from "../helpers/jsonFormatter";
+import { formatDate } from "../helpers/formatDate";
 
 Vue.use(Vuex);
 
 export const store = new Vuex.Store({
   state: {
     data: formatJson(jsonData),
-    date: {
-      today: new Date(),
-    },
-    currentWeek: [], // Добавляем новое состояние для хранения текущей недели
-    // todo: busyDaysOnWeek = [],
-
+    currentDay: new Date(),
+    currentWeek: [],
   },
   getters: {
     allEvents(state) {
       return state.data;
     },
     todayWeek(state) {
-      function formatDate(date) {
-        return new Intl.DateTimeFormat("ru-RU", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        })
-          .format(date)
-          .replace(/(\d{2})\.(\d{2})\.(\d{4})/, "$3-$2-$1");
-      }
-      const today = state.date.today;
+      const today = state.currentDay;
       const weekStart =
-        today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1); // Понедельник как первый день недели
+        today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
+      // Понедельник как первый день недели
       let week = [];
-
       for (let i = 0; i < 7; i++) {
         let day = new Date(today.setDate(weekStart + i));
         week.push(formatDate(day));
@@ -50,8 +38,7 @@ export const store = new Vuex.Store({
             dates.includes(state.data[key].end)
         )
         .reduce((obj, key) => {
-          // obj[key] = state.data[key];
-          obj = [...obj, state.data[key]]
+          obj = [...obj, state.data[key]];
           return obj;
         }, []);
       return filteredObject;
@@ -63,24 +50,15 @@ export const store = new Vuex.Store({
       state.currentWeek = newWeek;
     },
     // Мутация для обновления сегодняшней даты (если потребуется)
-    updateToday(state, newDate) {
-      state.date.today = newDate;
+    updateToday(state) {
+      // Обновляем сегодняшнюю дату на реальное текущее время
+      state.currentDay = new Date();
     },
-    //todo: updateBusyDaysOnWeek
   },
   actions: {
     // Действие для инициализации или обновления текущей недели
     initializeOrUpdateWeek({ commit, state }) {
-      function formatDate(date) {
-        return new Intl.DateTimeFormat("ru-RU", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-        })
-          .format(date)
-          .replace(/(\d{2})\.(\d{2})\.(\d{4})/, "$3-$2-$1");
-      }
-      const today = state.date.today;
+      const today = state.currentDay;
       const weekStart =
         today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
       let week = [];
@@ -96,6 +74,11 @@ export const store = new Vuex.Store({
 
       commit("updateCurrentWeek", week);
     },
-    // todo: initializeOrUpdateBusyDaysOnWeek
+    resetWeek({ commit, getters }) {
+      // Получаем текущую неделю из геттеров
+      const week = getters.todayWeek;
+      // Коммитим новую неделю в состояние
+      commit("updateCurrentWeek", week);
+    },
   },
 });

@@ -8,7 +8,7 @@
 import CalendarGrid from "./CalendarGrid.vue";
 
 export default {
-  name: "App",
+  name: "app",
   components: {
     CalendarGrid,
   },
@@ -20,8 +20,10 @@ export default {
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   box-sizing: border-box;
-  padding: 12px;
   margin: 0;
   font-size: 16px;
+  --border-color: #ccc;
+  --date-grid: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  --common-border: 1px solid var(--border-color);
 }
 </style>
