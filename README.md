@@ -18,7 +18,6 @@ cd booking-calendar
 ```
 npm install
 npm run serve
-
 ```
 
 ### 3. Open browser, app will be running at http://localhost:8080/
